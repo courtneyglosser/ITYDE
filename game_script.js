@@ -22,6 +22,9 @@ var config = {
 var game = new Phaser.Game(config);
 var platforms;
 var player;
+var npcs;
+var monsters;
+var gameOver = false;
 
 function preload ()
 {
@@ -29,6 +32,8 @@ function preload ()
     this.load.image('ground', 'Assets/Images/Platform.png');
     this.load.image('player', 'Assets/Images/PC.png');
 
+    this.load.image('npc', 'Assets/Images/NPC.png');
+    this.load.image('monster', 'Assets/Images/Monster.png');
 }
 
 function create ()
@@ -63,20 +68,45 @@ function create ()
     player.setBounce(0.2);
 //    player.setCollideWorldBounds(true);
 
+    //  Some monsters to kill, 12 in total, evenly spaced 70 pixels apart along the x axis
+    monsters = this.physics.add.group({
+        key: 'monster',
+        repeat: 11,
+        setXY: { x: 12, y: 0, stepX: 70 }
+    });
+
+    monsters.children.iterate(function (child) {
+
+        //  Give each star a slightly different bounce
+        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+
+    });
+
+    npcs = this.physics.add.group();
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
-//    this.physics.add.collider(stars, platforms);
-//    this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(monsters, platforms);
+    this.physics.add.collider(npcs, platforms);
 
     //  Input Events
     cursors = this.input.keyboard.createCursorKeys();
 
     // Setting camera bounds.
     this.cameras.main.setBounds(0, 0, xLimit, yLimit);
+
+    //  Checks to see if the player overlaps with any of the monsters, if he does call the killMonster function
+    this.physics.add.overlap(player, monsters, killMonster, null, this);
+
+    this.physics.add.collider(player, npcs, hitNPC, null, this);
 }
 
 function update ()
 {
+    if (gameOver)
+    {
+        return;
+    }
+
     if (cursors.left.isDown && player.x > 16)
     {
         player.setVelocityX(-160);
@@ -103,5 +133,47 @@ function update ()
 
 
     this.cameras.main.centerOn(player.x, player.y); // follow player
+}
+
+
+
+
+
+function killMonster (player, monster)
+{
+    monster.disableBody(true, true);
+
+    //  Add and update the score
+//    score += 10;
+//    scoreText.setText('Score: ' + score);
+
+    if (monsters.countActive(true) === 0)
+    {
+        monsters.children.iterate(function (child) {
+
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var npc = npcs.create(x, 16, 'npc');
+        npc.setBounce(1);
+        npc.setCollideWorldBounds(true);
+        npc.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        npc.allowGravity = false;
+
+    }
+}
+
+function hitNPC (player, npc)
+{
+    this.physics.pause();
+
+    player.setTint(0xff0000);
+
+//    player.anims.play('turn');
+
+    gameOver = true;
 }
 
