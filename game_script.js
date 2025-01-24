@@ -24,9 +24,10 @@ var platforms;
 var player;
 var npcs;
 var monsters;
+var monsterY = 450;
 var gameOver = false;
 var frameCount = 0;
-var npcBounce = -5;
+var npcBounce = -25;
 
 function preload ()
 {
@@ -74,7 +75,7 @@ function create ()
     monsters = this.physics.add.group({
         key: 'monster',
         repeat: 11,
-        setXY: { x: 12, y: 0, stepX: 70 }
+        setXY: { x: 12, y: monsterY }
     });
 
     monsters.children.iterate(function (child) {
@@ -155,7 +156,7 @@ function killMonster (player, monster)
     {
         monsters.children.iterate(function (child) {
 
-            child.enableBody(true, child.x, 0, true, true);
+            child.enableBody(true, child.x, monsterY, true, true);
 
         });
 
