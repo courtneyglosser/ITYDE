@@ -25,6 +25,8 @@ var player;
 var npcs;
 var monsters;
 var gameOver = false;
+var frameCount = 0;
+var npcBounce = -5;
 
 function preload ()
 {
@@ -133,6 +135,8 @@ function update ()
 
 
     this.cameras.main.centerOn(player.x, player.y); // follow player
+
+    updateNPCs();
 }
 
 
@@ -157,11 +161,11 @@ function killMonster (player, monster)
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-        var npc = npcs.create(x, 16, 'npc');
-        npc.setBounce(1);
+        var npc = npcs.create(x, 500, 'npc');
+        npc.setBounce(0.01);
         npc.setCollideWorldBounds(true);
-        npc.setVelocity(Phaser.Math.Between(-200, 200), 20);
-        npc.allowGravity = false;
+        npc.setVelocity(Phaser.Math.Between(-20, 20), npcBounce);
+        npc.allowGravity = true;
 
     }
 }
@@ -177,3 +181,11 @@ function hitNPC (player, npc)
     gameOver = true;
 }
 
+function updateNPCs() {
+    if (frameCount++ > 20) {
+        npcs.children.iterate(function (child) {
+            child.setVelocity(Phaser.Math.Between(-40, 40), npcBounce);
+        });
+        frameCount = 0;
+    }
+}
