@@ -23,11 +23,16 @@ var game = new Phaser.Game(config);
 var platforms;
 var player;
 var npcs;
+var npcY = 525;
+var npcBounce = -25;
+
 var monsters;
 var monsterY = 450;
 var gameOver = false;
 var frameCount = 0;
-var npcBounce = -25;
+var score = 0;
+var scoreText;
+var debugText;
 
 function preload ()
 {
@@ -101,6 +106,10 @@ function create ()
     this.physics.add.overlap(player, monsters, killMonster, null, this);
 
     this.physics.add.collider(player, npcs, hitNPC, null, this);
+    scoreText = this.add.text(16, 16, 'Goodwill: 0', { fontSize: '32px', fill: '#000' });
+
+    debugText = this.add.text(400, 16, 'test debug', {fontsize: '8px', fill: '#000'});
+    this.pointer = this.input.activePointer;
 }
 
 function update ()
@@ -149,8 +158,8 @@ function killMonster (player, monster)
     monster.disableBody(true, true);
 
     //  Add and update the score
-//    score += 10;
-//    scoreText.setText('Score: ' + score);
+    score += 10;
+    scoreText.setText('Goodwill: ' + score);
 
     if (monsters.countActive(true) === 0)
     {
@@ -162,13 +171,14 @@ function killMonster (player, monster)
 
         var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
 
-        var npc = npcs.create(x, 500, 'npc');
+        var npc = npcs.create(x, npcY, 'npc');
         npc.setBounce(0.01);
         npc.setCollideWorldBounds(true);
         npc.setVelocity(Phaser.Math.Between(-20, 20), npcBounce);
         npc.allowGravity = true;
 
     }
+    debugText.setText('Mouse: (' + this.pointer.x + ', ' + this.pointer.y +')');
 }
 
 function hitNPC (player, npc)
@@ -183,7 +193,7 @@ function hitNPC (player, npc)
 }
 
 function updateNPCs() {
-    if (frameCount++ > 20) {
+    if (frameCount++ > 40) {
         npcs.children.iterate(function (child) {
             child.setVelocity(Phaser.Math.Between(-40, 40), npcBounce);
         });
