@@ -25,6 +25,7 @@ var player;
 var npcs;
 var npcY = 525;
 var npcBounce = -25;
+var variance = 1;
 
 var monsters;
 var monsterY = 450;
@@ -42,6 +43,8 @@ function preload ()
 
     this.load.image('npc', 'Assets/Images/NPC.png');
     this.load.image('monster', 'Assets/Images/Monster.png');
+
+    this.load.image('house', 'Assets/Images/House.png');
 }
 
 function create ()
@@ -49,6 +52,8 @@ function create ()
     this.add.tileSprite(0,0, this.scale.width, this.scale.height,"sky")
         .setOrigin(0, 0)
         .setScrollFactor(0);
+
+    this.add.image(400, 520, 'house');
 
     xLimit = this.scale.width * 2;
     yLimit = this.scale.height;
@@ -109,6 +114,7 @@ function create ()
     scoreText = this.add.text(16, 16, 'Goodwill: 0', { fontSize: '32px', fill: '#000' });
 
     debugText = this.add.text(400, 16, 'test debug', {fontsize: '8px', fill: '#000'});
+    varianceText = this.add.text(400, 32, 'variance debug', {fontsize: '8px', fill: '#000'});
     this.pointer = this.input.activePointer;
 }
 
@@ -176,7 +182,6 @@ function killMonster (player, monster)
         npc.setCollideWorldBounds(true);
         npc.setVelocity(Phaser.Math.Between(-20, 20), npcBounce);
         npc.allowGravity = true;
-
     }
     debugText.setText('Mouse: (' + this.pointer.x + ', ' + this.pointer.y +')');
 }
@@ -195,7 +200,11 @@ function hitNPC (player, npc)
 function updateNPCs() {
     if (frameCount++ > 40) {
         npcs.children.iterate(function (child) {
-            child.setVelocity(Phaser.Math.Between(-40, 40), npcBounce);
+            variance = (400 - child.x) / 10;
+            varianceText.setText('Variance: ' + variance);
+            variance = variance + Phaser.Math.Between(-20, 20);
+//            child.setVelocity(Phaser.Math.Between(-40, 40), npcBounce);
+            child.setVelocity(variance, npcBounce);
         });
         frameCount = 0;
     }
